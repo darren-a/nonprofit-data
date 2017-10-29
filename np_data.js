@@ -49,10 +49,18 @@ var view = {
 
   	var url = CA_SEARCH;
   	//var url = TEST_URL;
-
-  	makeCorsRequest(url);
+    makeCorsRequest(url);
 
     console.log('cors req has been sent');
+
+    /* get the first page of state results for CA
+    *  - parse this to see how many pages are in the full result set
+    *  - build the local db by going back to the CA search for pages 
+    *  1 to n (first page is page 0)
+    *  check that full list of EINs matches that from page 0
+    */
+
+
   }
 
 
@@ -127,8 +135,8 @@ function makeCorsRequest(url) {
   // Response handlers.
   xhr.onload = function() {
     var text = xhr.responseText;
-    var title = getTitle(text);
-    alert('Response from CORS request to ' + url + ': ' + title);
+    //var title = getTitle(text); // not given with API data
+    console.log('Response from CORS request to ' + url + ':\n' + text);
   };
 
   xhr.onerror = function() {
