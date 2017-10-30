@@ -73,3 +73,22 @@ body {
   text-transform: uppercase;
 }
 
+/*
+  ========================================
+  Buttons
+  ========================================
+*/
+
+/*.btn */
+button {
+  border-radius: 25px;
+  display: inline-block;
+  margin: 20;
+}
+
+.btn-alt {
+  border: 1px solid #dfe2e5;
+  padding: 10px 30px;
+}
+
+
