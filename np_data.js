@@ -29,6 +29,10 @@ const BASE_SEARCH = URL + 'search.json?';
 const CA_SEARCH = BASE_SEARCH + 'state%5Bid%5D=CA';
 const TEST_URL = 'https://httpbin.org/';
 const BASE_CA_SEARCH = 'https://projects.propublica.org/nonprofits/api/v2/search.json?state%5Bid%5D=CA&page=';
+const BASE_EIN_SEARCH = URL + 'organizations/';
+
+// EIN search:
+// https://projects.propublica.org/nonprofits/api/v2/organizations/142007220.json
 
 // https://projects.propublica.org/nonprofits/api/v2/search.json?state%5Bid%5D=CA <-- this works
 // https://projects.propublica.org/nonprofits/api/v2/search.json?page=1 <-- this works
@@ -100,12 +104,25 @@ const BAY_AREA_ZIPS =
   };
 
 
+///////////////////////////////////////////////////////////////////////////
+// Helper - getCountyFromZip
+function getCountyFromZip(zipString) {
+
+	var zip = zipString.slice(0, 5);
+
+	for(var key in BAY_AREA_ZIPS) {
+		if(BAY_AREA_ZIPS[key].includes(zip)) {
+			return key;
+		}
+	}
+	return 'unknown';
+}
+///////////////////////////////////////////////////////////////////////////
 
 var responseText = '';
 var totalResults;
 var orgs = [];
-var metadata = {};
-
+var sfBayOrgs = [];
 
 
 
@@ -117,6 +134,10 @@ var handlers = {
 
   showOrgs : function() {
   	view.showOrgs();
+  },
+
+  getSFData : function() {
+  	model.makeNineCountiesArray(); 
   }
 
 }
@@ -183,11 +204,23 @@ var model = {
 	},
 
 	makeNineCountiesArray : function() {
-		// go through all CA EINs and put all those in the 9 counties
-		// into a separate array of EIN objects.
+	  // go through all CA EINs and put all those in the 9 counties
+	  // into a separate array of EIN objects.
+	  
+	  //for(var i = 0; i < orgs.length; i++) {
+	  for(var i = 0; i <= 1; i++) {
+	  	var ein = orgs[i].ein;
+	  	var einUrl = BASE_EIN_SEARCH + ein + '.json';
+	  	// send off for each ein data - but need to make this synchronous, or do we?
+	  	console.log('making newUrl req for EIN: ' + einUrl);
+	  	makeCorsRequest(einUrl, model.receiveNineCountiesData);
+	  }
 
+	},
 
-
+	receiveNineCountiesData : function() {
+		console.log('received an EIN result');
+		console.log('it is: ' + responseText);
 	}
 
 }
@@ -215,10 +248,6 @@ var model = {
 //view.setupEventListeneres();
 
 
-
-/**
-took this all out as I'm pretty sure Pro Publica doesn't support CORS
-**/
 
 // https://www.html5rocks.com/en/tutorials/cors/
 // Create the XHR object.
