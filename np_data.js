@@ -104,25 +104,11 @@ const BAY_AREA_ZIPS =
   };
 
 
-///////////////////////////////////////////////////////////////////////////
-// Helper - getCountyFromZip
-function getCountyFromZip(zipString) {
-
-	var zip = zipString.slice(0, 5);
-
-	for(var key in BAY_AREA_ZIPS) {
-		if(BAY_AREA_ZIPS[key].includes(zip)) {
-			return key;
-		}
-	}
-	return 'unknown';
-}
-///////////////////////////////////////////////////////////////////////////
-
 var responseText = '';
 var totalResults;
 var orgs = [];
 var sfBayOrgs = [];
+
 
 
 
@@ -138,6 +124,10 @@ var handlers = {
 
   getSFData : function() {
   	model.makeNineCountiesArray(); 
+  },
+
+  showBayAreaOrgs : function() {
+  	view.showBayAreaOrgs();
   }
 
 }
@@ -159,7 +149,15 @@ var view = {
 
     console.log('ein count is: ' + einCount);
     document.getElementById("orgs").innerHTML += einCount;
+  },
+
+
+  showBayAreaOrgs : function() {
+    var stringBayAreaOrgs = JSON.stringify(sfBayOrgs);
+
+    console.log('\n\n\n===SF Bay orgs in our counties are=== ' + stringBayAreaOrgs);
   }
+
 
 }
 
@@ -208,7 +206,7 @@ var model = {
 	  // into a separate array of EIN objects.
 	  
 	  //for(var i = 0; i < orgs.length; i++) {
-	  for(var i = 0; i <= 1; i++) {
+	  for(var i = 0; i <= 20; i++) {
 	  	var ein = orgs[i].ein;
 	  	var einUrl = BASE_EIN_SEARCH + ein + '.json';
 	  	// send off for each ein data - but need to make this synchronous, or do we?
@@ -219,14 +217,29 @@ var model = {
 	},
 
 	receiveNineCountiesData : function() {
-		console.log('received an EIN result');
-		console.log('it is: ' + responseText);
+
+		var parsedOrg = JSON.parse(responseText);
+		//var orgBlob = [];
+		var orgMetaObj = {};
+		var county = getCountyFromZip(parsedOrg.organization.zipcode);
+
+		console.log('received EIN result with county: ' + county);
+		//console.log('it is: ' + responseText);
+
+		if(county !== 'unknown') {
+	      console.log('\ncounty IS in our area: ' + county);
+	      orgMetaObj.ein = parsedOrg.organization.ein;
+	      orgMetaObj.zip = parsedOrg.organization.zipcode;
+	      orgMetaObj.county = county;
+	      orgMetaObj.organization = parsedOrg.organization;
+	      //orgBlob.push(orgMetaObj.);
+	      sfBayOrgs.push(orgMetaObj);
+		} else {
+		  console.log('\ncounty is not in our area: ' + county);
+		}
 	}
 
 }
-
-
-
 
   
 
@@ -305,4 +318,20 @@ function makeCorsRequest(url, cb) {
   xhr.send();
 }
 
+
+
+///////////////////////////////////////////////////////////////////////////
+// Helper - getCountyFromZip
+function getCountyFromZip(zipString) {
+
+	var zip = zipString.slice(0, 5);
+
+	for(var key in BAY_AREA_ZIPS) {
+		if(BAY_AREA_ZIPS[key].includes(zip)) {
+			return key;
+		}
+	}
+	return 'unknown';
+}
+///////////////////////////////////////////////////////////////////////////
 
